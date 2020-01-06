@@ -31,7 +31,14 @@ int parse_vm(char** buffer) {
             continue;
         }
         total += i;
-        parse_line(&line);
+        command* command = new_command();
+        // Parse it
+        parse_line(&line, command);
+        printf("Got cmd: %s arg1: %s arg2: %d\n", command->type, command->arg1, command->arg2);
+        // Code Writer
+        //
+        //
+        del_command(command);
         free(line);
     }
 break2:;
@@ -40,7 +47,7 @@ break2:;
     return 0;
 }
 
-int parse_line(char** line) {
+command* parse_line(char** line, command* command) {
 
     if( (*line)[0] == '/' && (*line)[1] == '/' ) return 0;
 
@@ -48,6 +55,7 @@ int parse_line(char** line) {
     int i = 0;
 
     int cmd_i = 0;
+    char** command_parts = malloc(sizeof(char*)*10);
 
     char c = 'a';
     // Command seperated by whitespace
@@ -63,19 +71,27 @@ int parse_line(char** line) {
         // i -1 to exclude the whitespace
         strncpy(word, (*line) + total, i - 1);
         if (strcmp(word,"") != 0) {
-            ht_item* cmd = get_ht_item(command_ht, word);
-            if(cmd != NULL) {
-                printf("%s is a command %s\n",cmd->key, cmd->value);
-            } else {
-                printf("%s is unknown\n", word);
-            }
+            command_parts[cmd_i] = strdup(word);
             cmd_i++;
         }
 
-        total += i;
         free(word);
+        total += i;
     }
 break2:;
 
-    return 0;
+    command->type = strdup(command_parts[0]);
+    if (command_parts[1] != NULL) {
+        command->arg1 = strdup(command_parts[1]);
+    }
+    if (command_parts[2] != NULL) {
+        command->arg2 = atoi(command_parts[2]);
+    }
+
+    while(cmd_i > 0) {
+        cmd_i--;
+        free(command_parts[cmd_i]);
+    }
+    free(command_parts);
+    return command;
 }
