@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "command_table.h"
+#include "code_writer.h"
 
 int parse_vm(char** buffer) {
     init_command_ht();
@@ -33,10 +34,10 @@ int parse_vm(char** buffer) {
         total += i;
         command* command = new_command();
         // Parse it
-        parse_line(&line, command);
-        printf("Got cmd: %s arg1: %s arg2: %d\n", command->type, command->arg1, command->arg2);
+        if(parse_line(&line, command) == 0) {
+            write_command(command);
+        }
         // Code Writer
-        //
         //
         del_command(command);
         free(line);
@@ -47,10 +48,7 @@ break2:;
     return 0;
 }
 
-command* parse_line(char** line, command* command) {
-
-    if( (*line)[0] == '/' && (*line)[1] == '/' ) return 0;
-
+int parse_line(char** line, command* command) {
     int total = 0;
     int i = 0;
 
@@ -66,10 +64,23 @@ command* parse_line(char** line, command* command) {
             c = (*line)[i + total];
             i++;
             if(c == '\0') goto break2;
+
+            // stop if comment
+            if(c == '/' && (*line)[i + total] == '/') {
+                // if comment on the first line..
+                if(total == 0) {
+                    free(command_parts);
+                    return 1;
+                }
+                // else there might be code
+                break;
+            }
         }
         char* word = (char*) malloc(4096);
         // i -1 to exclude the whitespace
         strncpy(word, (*line) + total, i - 1);
+
+        // :/
         if (strcmp(word,"") != 0) {
             command_parts[cmd_i] = strdup(word);
             cmd_i++;
@@ -80,7 +91,12 @@ command* parse_line(char** line, command* command) {
     }
 break2:;
 
-    command->type = strdup(command_parts[0]);
+    if (command_parts[0] != NULL) {
+        command->type =  strdup(get_ht_item(command_ht, command_parts[0])->value);
+        if (strcmp(command->type,"C_ARITHMETIC") == 0 ){
+            command->arg1 = strdup(command_parts[0]);
+        }
+    }
     if (command_parts[1] != NULL) {
         command->arg1 = strdup(command_parts[1]);
     }
@@ -93,5 +109,5 @@ break2:;
         free(command_parts[cmd_i]);
     }
     free(command_parts);
-    return command;
+    return 0;
 }

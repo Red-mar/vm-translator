@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
 
     parse_vm(&buffer);
 
-
+    fclose(file);
     free(buffer);
 
     return 0;

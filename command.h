@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 typedef struct {
+    // TODO: Hash table should support int for enum
     char* type;
     char* arg1;
     int arg2;

@@ -4,6 +4,6 @@
 #include "command.h"
 
 int parse_vm(char** buffer);
-command* parse_line(char** line, command* command);
+int parse_line(char** line, command* command);
 
 #endif // __PARSER_H_
