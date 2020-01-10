@@ -9,6 +9,8 @@
 
 int parse_vm(char** buffer) {
     init_command_ht();
+    //move
+    init_writer("test.asm");
 
     char* code = (char *) malloc(4096);
 
@@ -101,7 +103,7 @@ break2:;
         command->arg1 = strdup(command_parts[1]);
     }
     if (command_parts[2] != NULL) {
-        command->arg2 = atoi(command_parts[2]);
+        command->arg2 = strdup(command_parts[2]);
     }
 
     while(cmd_i > 0) {

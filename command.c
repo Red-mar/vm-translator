@@ -8,5 +8,6 @@ command* new_command() {
 void del_command(command* command) {
     free(command->type);
     free(command->arg1);
+    free(command->arg2);
     free(command);
 }
